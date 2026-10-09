@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
-
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
@@ -12,13 +11,11 @@ function Register() {
     const [role, setRole] = useState("STUDENT");
 
     const handleRegister = async (e) => {
-
         e.preventDefault();
 
         try {
-
             const response = await axios.post(
-                "http://localhost:8081/api/users/register",
+                "https://resourceconnect-backend.onrender.com/api/users/register",
                 {
                     name,
                     email,
@@ -28,33 +25,27 @@ function Register() {
             );
 
             console.log("Registration successful:", response.data);
-
             alert("Registration successful!");
-
             navigate("/");
-
         } catch (error) {
-
             console.error("Registration error:", error);
 
             if (error.response) {
-
+                const message = error.response.data;
                 alert(
-                    error.response.data ||
-                    "Registration failed"
+                    typeof message === "string"
+                        ? message
+                        : "Registration failed"
                 );
-
             } else {
-
                 alert(
-                    "Unable to connect to server. Make sure Spring Boot is running."
+                    "Unable to connect to the server. Please try again."
                 );
             }
         }
     };
 
     return (
-
         <div
             style={{
                 minHeight: "100vh",
@@ -62,22 +53,22 @@ function Register() {
                 justifyContent: "center",
                 alignItems: "center",
                 background: "#f4f6f9",
-                fontFamily: "Arial, sans-serif"
+                fontFamily: "Arial, sans-serif",
+                padding: "20px",
+                boxSizing: "border-box"
             }}
         >
-
             <div
                 style={{
-                    width: "420px",
+                    width: "100%",
+                    maxWidth: "420px",
                     background: "white",
                     padding: "40px",
                     borderRadius: "12px",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+                    boxSizing: "border-box"
                 }}
             >
-
-                {/* Logo */}
-
                 <h1
                     style={{
                         textAlign: "center",
@@ -98,11 +89,7 @@ function Register() {
                     Create your account
                 </p>
 
-
                 <form onSubmit={handleRegister}>
-
-                    {/* Name */}
-
                     <label
                         style={{
                             display: "block",
@@ -117,9 +104,7 @@ function Register() {
                         type="text"
                         placeholder="Enter your full name"
                         value={name}
-                        onChange={(e) =>
-                            setName(e.target.value)
-                        }
+                        onChange={(e) => setName(e.target.value)}
                         required
                         style={{
                             width: "100%",
@@ -131,9 +116,6 @@ function Register() {
                             fontSize: "15px"
                         }}
                     />
-
-
-                    {/* Email */}
 
                     <label
                         style={{
@@ -149,9 +131,7 @@ function Register() {
                         type="email"
                         placeholder="Enter your email"
                         value={email}
-                        onChange={(e) =>
-                            setEmail(e.target.value)
-                        }
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                         style={{
                             width: "100%",
@@ -163,9 +143,6 @@ function Register() {
                             fontSize: "15px"
                         }}
                     />
-
-
-                    {/* Password */}
 
                     <label
                         style={{
@@ -181,9 +158,7 @@ function Register() {
                         type="password"
                         placeholder="Create a password"
                         value={password}
-                        onChange={(e) =>
-                            setPassword(e.target.value)
-                        }
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                         style={{
                             width: "100%",
@@ -195,9 +170,6 @@ function Register() {
                             fontSize: "15px"
                         }}
                     />
-
-
-                    {/* Role */}
 
                     <label
                         style={{
@@ -211,9 +183,7 @@ function Register() {
 
                     <select
                         value={role}
-                        onChange={(e) =>
-                            setRole(e.target.value)
-                        }
+                        onChange={(e) => setRole(e.target.value)}
                         style={{
                             width: "100%",
                             padding: "12px",
@@ -225,19 +195,9 @@ function Register() {
                             background: "white"
                         }}
                     >
-
-                        <option value="STUDENT">
-                            STUDENT
-                        </option>
-
-                        <option value="FACULTY">
-                            FACULTY
-                        </option>
-
+                        <option value="STUDENT">STUDENT</option>
+                        <option value="FACULTY">FACULTY</option>
                     </select>
-
-
-                    {/* Register Button */}
 
                     <button
                         type="submit"
@@ -254,11 +214,7 @@ function Register() {
                     >
                         Create Account
                     </button>
-
                 </form>
-
-
-                {/* Login */}
 
                 <div
                     style={{
@@ -266,19 +222,13 @@ function Register() {
                         marginTop: "25px"
                     }}
                 >
-
-                    <p
-                        style={{
-                            color: "#6b7280"
-                        }}
-                    >
+                    <p style={{ color: "#6b7280" }}>
                         Already have an account?
                     </p>
 
                     <button
-                        onClick={() =>
-                            navigate("/")
-                        }
+                        type="button"
+                        onClick={() => navigate("/")}
                         style={{
                             background: "transparent",
                             color: "#2563eb",
@@ -289,13 +239,11 @@ function Register() {
                     >
                         ← Back to Login
                     </button>
-
                 </div>
-
             </div>
-
         </div>
     );
 }
 
 export default Register;
+

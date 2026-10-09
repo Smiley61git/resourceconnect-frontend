@@ -1,9 +1,9 @@
+```jsx
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
-
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -11,13 +11,11 @@ function Login() {
     const [showPassword, setShowPassword] = useState(false);
 
     const handleLogin = async (e) => {
-
         e.preventDefault();
 
         try {
-
             const response = await axios.post(
-                "http://localhost:8081/api/users/login",
+                "https://resourceconnect-backend.onrender.com/api/users/login",
                 {
                     email: email,
                     password: password
@@ -26,20 +24,9 @@ function Login() {
 
             console.log("Login successful:", response.data);
 
-            localStorage.setItem(
-                "userEmail",
-                response.data.email
-            );
-
-            localStorage.setItem(
-                "userName",
-                response.data.name
-            );
-
-            localStorage.setItem(
-                "userRole",
-                response.data.role
-            );
+            localStorage.setItem("userEmail", response.data.email);
+            localStorage.setItem("userName", response.data.name);
+            localStorage.setItem("userRole", response.data.role);
 
             alert("Login successful!");
 
@@ -48,44 +35,37 @@ function Login() {
             } else {
                 navigate("/dashboard");
             }
-
         } catch (error) {
-
             console.error("Login error:", error);
 
             if (error.response) {
-
+                const message = error.response.data;
                 alert(
-                    error.response.data ||
-                    "Invalid email or password"
+                    typeof message === "string"
+                        ? message
+                        : "Invalid email or password"
                 );
-
             } else {
-
                 alert(
-                    "Unable to connect to server. Make sure Spring Boot is running."
+                    "Unable to connect to the server. Please try again."
                 );
-
             }
         }
     };
 
     return (
-
         <div
             style={{
                 minHeight: "100vh",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                background:
-                    "linear-gradient(135deg, #eef4ff, #f5f3ff, #faf5ff)",
+                background: "linear-gradient(135deg, #eef4ff, #f5f3ff, #faf5ff)",
                 fontFamily: "Arial, sans-serif",
                 padding: "30px",
                 boxSizing: "border-box"
             }}
         >
-
             <div
                 style={{
                     width: "100%",
@@ -93,34 +73,29 @@ function Login() {
                     background: "rgba(255,255,255,0.97)",
                     padding: "40px",
                     borderRadius: "22px",
-                    boxShadow:
-                        "0 15px 40px rgba(79,70,229,0.18)",
+                    boxShadow: "0 15px 40px rgba(79,70,229,0.18)",
                     border: "1px solid #e0e7ff",
                     boxSizing: "border-box"
                 }}
             >
-
                 <div
                     style={{
                         textAlign: "center",
                         marginBottom: "30px"
                     }}
                 >
-
                     <div
                         style={{
                             width: "75px",
                             height: "75px",
                             margin: "0 auto 18px",
                             borderRadius: "20px",
-                            background:
-                                "linear-gradient(135deg, #2563eb, #7c3aed)",
+                            background: "linear-gradient(135deg, #2563eb, #7c3aed)",
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
                             fontSize: "38px",
-                            boxShadow:
-                                "0 8px 20px rgba(79,70,229,0.25)"
+                            boxShadow: "0 8px 20px rgba(79,70,229,0.25)"
                         }}
                     >
                         📚
@@ -145,20 +120,17 @@ function Login() {
                     >
                         Share • Discover • Connect
                     </p>
-
                 </div>
 
                 <div
                     style={{
-                        background:
-                            "linear-gradient(135deg, #eef4ff, #f5f0ff)",
+                        background: "linear-gradient(135deg, #eef4ff, #f5f0ff)",
                         padding: "18px",
                         borderRadius: "12px",
                         marginBottom: "25px",
                         textAlign: "center"
                     }}
                 >
-
                     <h2
                         style={{
                             margin: "0 0 5px",
@@ -178,11 +150,9 @@ function Login() {
                     >
                         Login to continue to your account
                     </p>
-
                 </div>
 
                 <form onSubmit={handleLogin}>
-
                     <label
                         style={{
                             display: "block",
@@ -199,9 +169,7 @@ function Login() {
                         type="email"
                         placeholder="Enter your email"
                         value={email}
-                        onChange={(e) =>
-                            setEmail(e.target.value)
-                        }
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                         style={{
                             width: "100%",
@@ -234,18 +202,11 @@ function Login() {
                             marginBottom: "25px"
                         }}
                     >
-
                         <input
-                            type={
-                                showPassword
-                                    ? "text"
-                                    : "password"
-                            }
+                            type={showPassword ? "text" : "password"}
                             placeholder="Enter your password"
                             value={password}
-                            onChange={(e) =>
-                                setPassword(e.target.value)
-                            }
+                            onChange={(e) => setPassword(e.target.value)}
                             required
                             style={{
                                 width: "100%",
@@ -260,9 +221,7 @@ function Login() {
 
                         <button
                             type="button"
-                            onClick={() =>
-                                setShowPassword(!showPassword)
-                            }
+                            onClick={() => setShowPassword(!showPassword)}
                             style={{
                                 position: "absolute",
                                 right: "10px",
@@ -276,7 +235,6 @@ function Login() {
                         >
                             {showPassword ? "🙈" : "👁️"}
                         </button>
-
                     </div>
 
                     <button
@@ -284,21 +242,18 @@ function Login() {
                         style={{
                             width: "100%",
                             padding: "13px",
-                            background:
-                                "linear-gradient(135deg, #2563eb, #7c3aed)",
+                            background: "linear-gradient(135deg, #2563eb, #7c3aed)",
                             color: "white",
                             border: "none",
                             borderRadius: "9px",
                             fontSize: "16px",
                             fontWeight: "bold",
                             cursor: "pointer",
-                            boxShadow:
-                                "0 7px 18px rgba(79,70,229,0.25)"
+                            boxShadow: "0 7px 18px rgba(79,70,229,0.25)"
                         }}
                     >
                         🔓 Login
                     </button>
-
                 </form>
 
                 <div
@@ -309,7 +264,6 @@ function Login() {
                         margin: "28px 0 20px"
                     }}
                 >
-
                     <div
                         style={{
                             flex: 1,
@@ -334,7 +288,6 @@ function Login() {
                             background: "#e5e7eb"
                         }}
                     />
-
                 </div>
 
                 <div
@@ -346,7 +299,6 @@ function Login() {
                         border: "1px solid #e0e7ff"
                     }}
                 >
-
                     <p
                         style={{
                             margin: "0 0 8px",
@@ -358,9 +310,8 @@ function Login() {
                     </p>
 
                     <button
-                        onClick={() =>
-                            navigate("/register")
-                        }
+                        type="button"
+                        onClick={() => navigate("/register")}
                         style={{
                             background: "transparent",
                             color: "#6d28d9",
@@ -372,7 +323,6 @@ function Login() {
                     >
                         Create New Account →
                     </button>
-
                 </div>
 
                 <p
@@ -385,11 +335,10 @@ function Login() {
                 >
                     🎓 Academic Resource Sharing Platform
                 </p>
-
             </div>
-
         </div>
     );
 }
 
 export default Login;
+```

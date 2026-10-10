@@ -14,7 +14,7 @@ function AdminUsers() {
         try {
 
             const response = await axios.get(
-                "http://localhost:8081/api/users"
+                "https://resourceconnect-backend.onrender.com/api/users"
             );
 
             setUsers(response.data);

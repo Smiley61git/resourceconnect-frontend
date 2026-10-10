@@ -15,11 +15,11 @@ function AdminStatistics() {
         try {
 
             const usersResponse = await axios.get(
-                "http://localhost:8081/api/users"
+                "https://resourceconnect-backend.onrender.com/api/users"
             );
 
             const resourcesResponse = await axios.get(
-                "http://localhost:8081/api/resources"
+                "https://resourceconnect-backend.onrender.com/api/resources"
             );
 
             setUsers(usersResponse.data);

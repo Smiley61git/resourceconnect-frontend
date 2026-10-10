@@ -48,7 +48,6 @@ function Login() {
     <div style={styles.page}>
       <div style={styles.card}>
         <div style={styles.logo}>📚</div>
-
         <h1 style={styles.title}>ResourceConnect</h1>
         <p style={styles.tagline}>Share • Discover • Connect</p>
 

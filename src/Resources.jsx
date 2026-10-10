@@ -20,6 +20,8 @@ function Resources() {
 
     const uploadedBy = localStorage.getItem("userName") || "";
     const userEmail = localStorage.getItem("userEmail") || "";
+    const userRole = localStorage.getItem("userRole") || "";
+    const isAdmin = userRole === "ADMIN";
 
     const fetchResources = useCallback(async () => {
         try {
@@ -53,6 +55,7 @@ function Resources() {
 
     const handleAddResource = async (e) => {
         e.preventDefault();
+        if (isAdmin) return;
 
         try {
             await axios.post(`${API}/api/resources`, {
@@ -74,6 +77,8 @@ function Resources() {
     };
 
     const handleEdit = (resource) => {
+        if (isAdmin) return;
+
         setEditingId(resource.id);
         setTitle(resource.title || "");
         setDescription(resource.description || "");
@@ -86,6 +91,7 @@ function Resources() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+        if (isAdmin) return;
 
         try {
             await axios.put(`${API}/api/resources/${editingId}`, {
@@ -107,6 +113,8 @@ function Resources() {
     };
 
     const handleDelete = async (id) => {
+        if (isAdmin) return;
+
         if (!window.confirm("Are you sure you want to delete this resource?")) {
             return;
         }
@@ -122,6 +130,8 @@ function Resources() {
     };
 
     const handleRequest = async (resource) => {
+        if (isAdmin) return;
+
         if (
             !window.confirm(
                 `Do you want to request "${resource.title}" from ${resource.uploadedBy}?`
@@ -181,7 +191,7 @@ function Resources() {
 
                 <div style={styles.navLinks}>
                     <button
-                        onClick={() => navigate("/dashboard")}
+                        onClick={() => navigate(isAdmin ? "/admin" : "/dashboard")}
                         style={styles.navButton}
                     >
                         Dashboard
@@ -194,12 +204,14 @@ function Resources() {
                         Resources
                     </button>
 
-                    <button
-                        onClick={() => navigate("/profile")}
-                        style={styles.navButton}
-                    >
-                        Profile
-                    </button>
+                    {!isAdmin && (
+                        <button
+                            onClick={() => navigate("/profile")}
+                            style={styles.navButton}
+                        >
+                            Profile
+                        </button>
+                    )}
 
                     <button onClick={handleLogout} style={styles.logoutButton}>
                         Logout
@@ -209,10 +221,14 @@ function Resources() {
 
             <main style={styles.main}>
                 <p style={styles.eyebrow}>RESOURCE SHARING PLATFORM</p>
-                <h1 style={styles.heading}>📚 Academic Resources</h1>
+                <h1 style={styles.heading}>
+                    📚 {isAdmin ? "Manage Academic Resources" : "Academic Resources"}
+                </h1>
 
                 <p style={styles.subtitle}>
-                    Find, share and request useful resources in one place.
+                    {isAdmin
+                        ? "Search, explore and open academic resources."
+                        : "Find, share and request useful resources in one place."}
                 </p>
 
                 <div style={styles.filters}>
@@ -237,98 +253,96 @@ function Resources() {
                     </select>
                 </div>
 
-                <section style={styles.formSection}>
-                    <div style={styles.formHeader}>
-                        <h2>
-                            {editingId
-                                ? "✏️ Edit Resource"
-                                : "📤 Add New Resource"}
-                        </h2>
-                        <p>Share useful academic resources with your community.</p>
-                    </div>
-
-                    <div style={styles.formBody}>
-                        <p style={styles.uploader}>
-                            Uploaded by: <strong>{uploadedBy || "User"}</strong>
-                        </p>
-
-                        <form
-                            onSubmit={editingId ? handleUpdate : handleAddResource}
-                        >
-                            <input
-                                type="text"
-                                placeholder="📚 Resource Title"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                required
-                                style={styles.input}
-                            />
-
-                            <textarea
-                                placeholder="📝 Resource Description"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                rows={4}
-                                style={styles.input}
-                            />
-
-                            <select
-                                value={subject}
-                                onChange={(e) => setSubject(e.target.value)}
-                                style={styles.input}
-                            >
-                                <option>Python</option>
-                                <option>Java</option>
-                                <option>DBMS</option>
-                                <option>Data Structures</option>
-                                <option>Machine Learning</option>
-                                <option>Artificial Intelligence</option>
-                                <option>Web Development</option>
-                                <option>Other</option>
-                            </select>
-
-                            <select
-                                value={resourceType}
-                                onChange={(e) => setResourceType(e.target.value)}
-                                style={styles.input}
-                            >
-                                <option>PDF</option>
-                                <option>Notes</option>
-                                <option>Video</option>
-                                <option>Assignment</option>
-                                <option>Question Paper</option>
-                                <option>Book</option>
-                                <option>Link</option>
-                                <option>Other</option>
-                            </select>
-
-                            <input
-                                type="url"
-                                placeholder="🔗 Resource URL (https://...)"
-                                value={resourceUrl}
-                                onChange={(e) => setResourceUrl(e.target.value)}
-                                required
-                                style={styles.input}
-                            />
-
-                            <button type="submit" style={styles.primaryButton}>
+                {!isAdmin && (
+                    <section style={styles.formSection}>
+                        <div style={styles.formHeader}>
+                            <h2>
                                 {editingId
-                                    ? "💾 Save Changes"
-                                    : "➕ Add Resource"}
-                            </button>
+                                    ? "✏️ Edit Resource"
+                                    : "📤 Add New Resource"}
+                            </h2>
+                            <p>Share useful academic resources with your community.</p>
+                        </div>
 
-                            {editingId && (
-                                <button
-                                    type="button"
-                                    onClick={clearForm}
-                                    style={styles.cancelButton}
+                        <div style={styles.formBody}>
+                            <p style={styles.uploader}>
+                                Uploaded by: <strong>{uploadedBy || "User"}</strong>
+                            </p>
+
+                            <form onSubmit={editingId ? handleUpdate : handleAddResource}>
+                                <input
+                                    type="text"
+                                    placeholder="📚 Resource Title"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    required
+                                    style={styles.input}
+                                />
+
+                                <textarea
+                                    placeholder="📝 Resource Description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    rows={4}
+                                    style={styles.input}
+                                />
+
+                                <select
+                                    value={subject}
+                                    onChange={(e) => setSubject(e.target.value)}
+                                    style={styles.input}
                                 >
-                                    ❌ Cancel
+                                    <option>Python</option>
+                                    <option>Java</option>
+                                    <option>DBMS</option>
+                                    <option>Data Structures</option>
+                                    <option>Machine Learning</option>
+                                    <option>Artificial Intelligence</option>
+                                    <option>Web Development</option>
+                                    <option>Other</option>
+                                </select>
+
+                                <select
+                                    value={resourceType}
+                                    onChange={(e) => setResourceType(e.target.value)}
+                                    style={styles.input}
+                                >
+                                    <option>PDF</option>
+                                    <option>Notes</option>
+                                    <option>Video</option>
+                                    <option>Assignment</option>
+                                    <option>Question Paper</option>
+                                    <option>Book</option>
+                                    <option>Link</option>
+                                    <option>Other</option>
+                                </select>
+
+                                <input
+                                    type="url"
+                                    placeholder="🔗 Resource URL (https://...)"
+                                    value={resourceUrl}
+                                    onChange={(e) => setResourceUrl(e.target.value)}
+                                    required
+                                    style={styles.input}
+                                />
+
+                                <button type="submit" style={styles.primaryButton}>
+                                    {editingId ? "💾 Save Changes" : "➕ Add Resource"}
                                 </button>
-                            )}
-                        </form>
-                    </div>
-                </section>
+
+                                {editingId && (
+                                    <button
+                                        type="button"
+                                        onClick={clearForm}
+                                        style={styles.cancelButton}
+                                    >
+                                        ❌ Cancel
+                                    </button>
+                                )}
+                            </form>
+                        </div>
+                    </section>
+                )}
 
                 <div style={styles.listHeader}>
                     <h2>Available Resources</h2>
@@ -343,7 +357,7 @@ function Resources() {
                     <div style={styles.empty}>
                         <div style={{ fontSize: "48px" }}>📭</div>
                         <h3>No resources found</h3>
-                        <p>Try another search or add a new resource.</p>
+                        <p>Try another search or subject.</p>
                     </div>
                 ) : (
                     <div style={styles.grid}>
@@ -356,13 +370,10 @@ function Resources() {
                                     </span>
                                 </div>
 
-                                <h2 style={styles.cardTitle}>
-                                    {resource.title}
-                                </h2>
+                                <h2 style={styles.cardTitle}>{resource.title}</h2>
 
                                 <p style={styles.description}>
-                                    {resource.description ||
-                                        "No description provided."}
+                                    {resource.description || "No description provided."}
                                 </p>
 
                                 <p>
@@ -370,8 +381,7 @@ function Resources() {
                                 </p>
 
                                 <p>
-                                    <strong>Shared by:</strong>{" "}
-                                    {resource.uploadedBy}
+                                    <strong>Shared by:</strong> {resource.uploadedBy}
                                 </p>
 
                                 <div style={styles.cardActions}>
@@ -388,32 +398,31 @@ function Resources() {
                                         🔗 Open
                                     </button>
 
-                                    {resource.uploadedBy === uploadedBy ? (
-                                        <>
-                                            <button
-                                                onClick={() => handleEdit(resource)}
-                                                style={styles.editButton}
-                                            >
-                                                ✏️ Edit
-                                            </button>
+                                    {!isAdmin &&
+                                        (resource.uploadedBy === uploadedBy ? (
+                                            <>
+                                                <button
+                                                    onClick={() => handleEdit(resource)}
+                                                    style={styles.editButton}
+                                                >
+                                                    ✏️ Edit
+                                                </button>
 
+                                                <button
+                                                    onClick={() => handleDelete(resource.id)}
+                                                    style={styles.deleteButton}
+                                                >
+                                                    🗑️ Delete
+                                                </button>
+                                            </>
+                                        ) : (
                                             <button
-                                                onClick={() =>
-                                                    handleDelete(resource.id)
-                                                }
-                                                style={styles.deleteButton}
+                                                onClick={() => handleRequest(resource)}
+                                                style={styles.requestButton}
                                             >
-                                                🗑️ Delete
+                                                📝 Request Resource
                                             </button>
-                                        </>
-                                    ) : (
-                                        <button
-                                            onClick={() => handleRequest(resource)}
-                                            style={styles.requestButton}
-                                        >
-                                            📝 Request Resource
-                                        </button>
-                                    )}
+                                        ))}
                                 </div>
                             </article>
                         ))}

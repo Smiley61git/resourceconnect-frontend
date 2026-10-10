@@ -19,26 +19,45 @@ function Login() {
     try {
       const response = await axios.post(
         "https://resourceconnect-backend.onrender.com/api/users/login",
-        { email, password }
+        { email: email.trim(), password }
       );
 
       const user = response.data;
 
-      localStorage.setItem("userEmail", user.email || email);
-      localStorage.setItem("userName", user.name || "");
-      localStorage.setItem("userRole", user.role || "STUDENT");
+      if (!user || typeof user !== "object") {
+        throw new Error("Invalid response from server. Please try again.");
+      }
 
-      if (user.role === "ADMIN") {
+      const role = String(user.role || "STUDENT").toUpperCase();
+
+      localStorage.setItem("userEmail", user.email || email.trim());
+      localStorage.setItem("userName", user.name || "");
+      localStorage.setItem("userRole", role);
+
+      if (role === "ADMIN") {
         navigate("/admin");
       } else {
         navigate("/dashboard");
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          err.response?.data ||
-          "Login failed. Please check your email and password."
-      );
+      console.error("Login error:", err);
+
+      const data = err.response?.data;
+      let message = "Login failed. Please check your email and password.";
+
+      if (typeof data === "string" && data.trim()) {
+        message = data;
+      } else if (data && typeof data === "object") {
+        message =
+          data.message ||
+          data.error ||
+          data.detail ||
+          message;
+      } else if (err.message && !err.response) {
+        message = "Unable to connect to the server. Please try again.";
+      }
+
+      setError(String(message));
     } finally {
       setLoading(false);
     }
@@ -75,6 +94,7 @@ function Login() {
               style={styles.passwordInput}
               required
             />
+
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -85,9 +105,17 @@ function Login() {
             </button>
           </div>
 
-          {error && <p style={styles.error}>{String(error)}</p>}
+          {error && <p style={styles.error}>{error}</p>}
 
-          <button type="submit" style={styles.loginButton} disabled={loading}>
+          <button
+            type="submit"
+            style={{
+              ...styles.loginButton,
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? "wait" : "pointer"
+            }}
+            disabled={loading}
+          >
             {loading ? "Logging in..." : "🔓 Login"}
           </button>
         </form>
@@ -103,7 +131,9 @@ function Login() {
           </Link>
         </p>
 
-        <p style={styles.footer}>🎓 Academic Resource Sharing Platform</p>
+        <p style={styles.footer}>
+          🎓 Academic Resource Sharing Platform
+        </p>
       </div>
     </div>
   );
@@ -118,7 +148,7 @@ const styles = {
     background: "linear-gradient(135deg, #fff7ed, #ffedd5)",
     padding: "20px",
     boxSizing: "border-box",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "Arial, sans-serif"
   },
   card: {
     width: "100%",
@@ -128,7 +158,7 @@ const styles = {
     borderRadius: "18px",
     boxShadow: "0 10px 35px rgba(0,0,0,0.10)",
     boxSizing: "border-box",
-    textAlign: "center",
+    textAlign: "center"
   },
   logo: { fontSize: "42px" },
   title: { color: "#ea580c", margin: "8px 0" },
@@ -140,7 +170,7 @@ const styles = {
     textAlign: "left",
     fontWeight: "bold",
     margin: "14px 0 8px",
-    color: "#44403c",
+    color: "#44403c"
   },
   input: {
     width: "100%",
@@ -148,13 +178,13 @@ const styles = {
     border: "1px solid #d6d3d1",
     borderRadius: "8px",
     boxSizing: "border-box",
-    fontSize: "15px",
+    fontSize: "15px"
   },
   passwordBox: {
     display: "flex",
     border: "1px solid #d6d3d1",
     borderRadius: "8px",
-    overflow: "hidden",
+    overflow: "hidden"
   },
   passwordInput: {
     flex: 1,
@@ -162,14 +192,14 @@ const styles = {
     padding: "12px",
     border: "none",
     outline: "none",
-    fontSize: "15px",
+    fontSize: "15px"
   },
   eye: {
     border: "none",
     background: "#fff",
     cursor: "pointer",
     padding: "0 12px",
-    fontSize: "17px",
+    fontSize: "17px"
   },
   loginButton: {
     width: "100%",
@@ -181,21 +211,25 @@ const styles = {
     color: "#fff",
     fontSize: "16px",
     fontWeight: "bold",
-    cursor: "pointer",
+    cursor: "pointer"
   },
   divider: {
     margin: "22px 0",
-    color: "#999",
+    color: "#999"
   },
   registerText: { color: "#57534e", fontSize: "14px" },
   registerLink: {
     color: "#ea580c",
     fontWeight: "bold",
     textDecoration: "none",
-    cursor: "pointer",
+    cursor: "pointer"
   },
-  error: { color: "#dc2626", fontSize: "14px", overflowWrap: "anywhere" },
-  footer: { marginTop: "28px", color: "#78716c", fontSize: "13px" },
+  error: {
+    color: "#dc2626",
+    fontSize: "14px",
+    overflowWrap: "anywhere"
+  },
+  footer: { marginTop: "28px", color: "#78716c", fontSize: "13px" }
 };
 
 export default Login;

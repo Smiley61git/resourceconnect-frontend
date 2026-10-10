@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +22,7 @@ function Resources() {
     const uploadedBy = localStorage.getItem("userName") || "";
     const userEmail = localStorage.getItem("userEmail") || "";
     const userRole = localStorage.getItem("userRole") || "";
-    const isAdmin = userRole === "ADMIN";
+    const isAdmin = userRole.trim().toUpperCase() === "ADMIN";
 
     const fetchResources = useCallback(async () => {
         try {
@@ -72,7 +73,7 @@ function Resources() {
             await fetchResources();
         } catch (error) {
             console.error(error);
-            alert("Unable to add resource. Please check the backend.");
+            alert("Unable to add resource. Please try again.");
         }
     };
 
@@ -91,7 +92,7 @@ function Resources() {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-        if (isAdmin) return;
+        if (isAdmin || editingId === null) return;
 
         try {
             await axios.put(`${API}/api/resources/${editingId}`, {
@@ -179,15 +180,18 @@ function Resources() {
 
     const subjects = [
         "ALL",
-        ...new Set(
-            resources.map((resource) => resource.subject).filter(Boolean)
-        )
+        ...new Set(resources.map((resource) => resource.subject).filter(Boolean))
     ];
 
     return (
         <div style={styles.page}>
             <nav style={styles.nav}>
-                <h2 style={styles.brand}>📚 ResourceConnect</h2>
+                <h2
+                    style={{ ...styles.brand, cursor: "pointer" }}
+                    onClick={() => navigate(isAdmin ? "/admin" : "/dashboard")}
+                >
+                    📚 ResourceConnect
+                </h2>
 
                 <div style={styles.navLinks}>
                     <button
@@ -221,8 +225,9 @@ function Resources() {
 
             <main style={styles.main}>
                 <p style={styles.eyebrow}>RESOURCE SHARING PLATFORM</p>
+
                 <h1 style={styles.heading}>
-                    📚 {isAdmin ? "Manage Academic Resources" : "Academic Resources"}
+                    📚 {isAdmin ? "Browse Academic Resources" : "Academic Resources"}
                 </h1>
 
                 <p style={styles.subtitle}>
@@ -257,9 +262,7 @@ function Resources() {
                     <section style={styles.formSection}>
                         <div style={styles.formHeader}>
                             <h2>
-                                {editingId
-                                    ? "✏️ Edit Resource"
-                                    : "📤 Add New Resource"}
+                                {editingId !== null ? "✏️ Edit Resource" : "📤 Add New Resource"}
                             </h2>
                             <p>Share useful academic resources with your community.</p>
                         </div>
@@ -269,7 +272,7 @@ function Resources() {
                                 Uploaded by: <strong>{uploadedBy || "User"}</strong>
                             </p>
 
-                            <form onSubmit={editingId ? handleUpdate : handleAddResource}>
+                            <form onSubmit={editingId !== null ? handleUpdate : handleAddResource}>
                                 <input
                                     type="text"
                                     placeholder="📚 Resource Title"
@@ -327,10 +330,10 @@ function Resources() {
                                 />
 
                                 <button type="submit" style={styles.primaryButton}>
-                                    {editingId ? "💾 Save Changes" : "➕ Add Resource"}
+                                    {editingId !== null ? "💾 Save Changes" : "➕ Add Resource"}
                                 </button>
 
-                                {editingId && (
+                                {editingId !== null && (
                                     <button
                                         type="button"
                                         onClick={clearForm}
@@ -361,45 +364,46 @@ function Resources() {
                     </div>
                 ) : (
                     <div style={styles.grid}>
-                        {filteredResources.map((resource) => (
-                            <article key={resource.id} style={styles.card}>
-                                <div style={styles.cardTop}>
-                                    <span style={{ fontSize: "36px" }}>📄</span>
-                                    <span style={styles.typeBadge}>
-                                        {resource.resourceType || "Resource"}
-                                    </span>
-                                </div>
+                        {filteredResources.map((resource) => {
+                            const isOwner = resource.uploadedBy === uploadedBy;
 
-                                <h2 style={styles.cardTitle}>{resource.title}</h2>
+                            return (
+                                <article key={resource.id} style={styles.card}>
+                                    <div style={styles.cardTop}>
+                                        <span style={{ fontSize: "36px" }}>📄</span>
+                                        <span style={styles.typeBadge}>
+                                            {resource.resourceType || "Resource"}
+                                        </span>
+                                    </div>
 
-                                <p style={styles.description}>
-                                    {resource.description || "No description provided."}
-                                </p>
+                                    <h2 style={styles.cardTitle}>{resource.title}</h2>
 
-                                <p>
-                                    <strong>Subject:</strong> {resource.subject}
-                                </p>
+                                    <p style={styles.description}>
+                                        {resource.description || "No description provided."}
+                                    </p>
 
-                                <p>
-                                    <strong>Shared by:</strong> {resource.uploadedBy}
-                                </p>
+                                    <p><strong>Subject:</strong> {resource.subject}</p>
+                                    <p><strong>Shared by:</strong> {resource.uploadedBy}</p>
 
-                                <div style={styles.cardActions}>
-                                    <button
-                                        onClick={() =>
-                                            window.open(
-                                                resource.resourceUrl,
-                                                "_blank",
-                                                "noopener,noreferrer"
-                                            )
-                                        }
-                                        style={styles.primaryButton}
-                                    >
-                                        🔗 Open
-                                    </button>
+                                    <div style={styles.cardActions}>
+                                        <button
+                                            onClick={() => {
+                                                if (resource.resourceUrl) {
+                                                    window.open(
+                                                        resource.resourceUrl,
+                                                        "_blank",
+                                                        "noopener,noreferrer"
+                                                    );
+                                                } else {
+                                                    alert("Resource link is unavailable.");
+                                                }
+                                            }}
+                                            style={styles.primaryButton}
+                                        >
+                                            🔗 Open
+                                        </button>
 
-                                    {!isAdmin &&
-                                        (resource.uploadedBy === uploadedBy ? (
+                                        {!isAdmin && isOwner && (
                                             <>
                                                 <button
                                                     onClick={() => handleEdit(resource)}
@@ -415,17 +419,20 @@ function Resources() {
                                                     🗑️ Delete
                                                 </button>
                                             </>
-                                        ) : (
+                                        )}
+
+                                        {!isAdmin && !isOwner && (
                                             <button
                                                 onClick={() => handleRequest(resource)}
                                                 style={styles.requestButton}
                                             >
                                                 📝 Request Resource
                                             </button>
-                                        ))}
-                                </div>
-                            </article>
-                        ))}
+                                        )}
+                                    </div>
+                                </article>
+                            );
+                        })}
                     </div>
                 )}
             </main>
